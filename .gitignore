@@ -1,0 +1,11 @@
+/genv
+/env
+
+/chroma_langchain_db
+
+__pycache__
+.gradio
+
+.env
+
+*.pdf
