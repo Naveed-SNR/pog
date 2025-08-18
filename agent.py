@@ -14,7 +14,7 @@ load_dotenv()
 llm = init_chat_model("google_genai:gemini-2.0-flash")
 memory = MemorySaver()
 embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
-file_path = "./data.pdf"
+file_path = "./data/data.pdf"
 loader = PyPDFLoader(
     file_path,
     mode="single",
