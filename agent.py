@@ -1,34 +1,16 @@
-# %%
-from langchain_community.document_loaders import PyPDFLoader
 from langchain_core.messages import  SystemMessage
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_chroma import Chroma
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain.chat_models import init_chat_model
 from langchain_core.tools import tool
 from langgraph.prebuilt import create_react_agent
+from db import vector_store
 from langgraph.checkpoint.memory import MemorySaver
 from dotenv import load_dotenv
+
 load_dotenv()
-# Chatbot demo with multimodal input (text, markdown, LaTeX, code blocks, image,audio, & video). Plus shows support for streaming text.
+
 llm = init_chat_model("google_genai:gemini-2.0-flash")
 memory = MemorySaver()
-embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
-file_path = "./data/data.pdf"
-loader = PyPDFLoader(
-    file_path,
-    mode="single",
-    extraction_mode="plain"
-)
-docs = loader.load()
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-all_splits = text_splitter.split_documents(docs)
-vector_store = Chroma(
-    collection_name="example_collection",
-    embedding_function=embeddings,
-    persist_directory="./chroma_langchain_db",  # Where to save data locally,remove if not necessary
-)
-vector_store.add_documents(all_splits)
+
 SYSTEM_PROMPT = (
     "You are POG - a Personal Document Assistant. Your primary function is to help users "
     "extract and find information from their uploaded documents.\n\n"
@@ -67,25 +49,20 @@ def retrieve(query: str) -> str:
     results = vector_store.similarity_search(query, k=3)
     if not results:
         return "No relevant documents found."
-    
     response = "Relevant documents:\n"
     for doc in results:
         response += f"- {doc.page_content}\n"
-    
     return response
+
 tools = [retrieve]
 
 agent = create_react_agent(model=llm, tools=tools, prompt=SystemMessage(content=SYSTEM_PROMPT), checkpointer=memory)
 
-
 def generate(history: list[dict]):
-    # query = input("Enter your query: \n")  # Your query
-    # input_message = {"role": "user", "content": query}
     result = agent.invoke({"messages": [("user", history[-1]["content"])]}, config=config)
-    # print(result["messages"][-1].content)
     return result
 
-# alternate generate function used to expliclitly pass entire history to the agent
+## alternate generate function used to expliclitly pass entire history to the agent
 # def generate_alt(history: list[dict]):
 #     # query = input("Enter your query: \n")  # Your query
 #     # input_message = {"role": "user", "content": query}
