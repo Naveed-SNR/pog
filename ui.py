@@ -3,8 +3,20 @@ import time
 from dotenv import load_dotenv
 from agent import generate
 from db import add_to_chroma, remove_from_chroma
-
 load_dotenv()
+
+
+custom_css = """
+html, body, #root, .gradio-container, main.fillable {
+    margin: 0 ;
+    margin-left: 3px  !important;
+    padding: 0 !important;
+    height: 100%;
+    width: 100%;
+    max-width: 100% !important;
+}
+"""
+
 
 def print_like_dislike(x: gr.LikeData):
     print(x.index, x.value, x.liked)
@@ -32,11 +44,11 @@ def bot(message, history):
         time.sleep(0.01)
         yield history[-1]
 
-with gr.Blocks(theme=gr.themes.Soft()) as demo:
-    with gr.Row():
-        with gr.Column():
+with gr.Blocks( css_paths="./style.css", css=custom_css) as demo:
+    with gr.Row(elem_classes=["row"]):
+        with gr.Column(elem_classes=["chat-column"]):
             chatbot = gr.ChatInterface(fn=bot, type="messages", multimodal=True, save_history=True, flagging_options=["like", "dislike"], flagging_mode="manual")
-        with gr.Column():
+        with gr.Column(elem_classes=["file-column"]):
             file_upload = gr.Files(height=809, label="File Browser", elem_id="file_browser", interactive=True)
             file_upload.upload(
                 fn=add_to_chroma,
