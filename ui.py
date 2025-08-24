@@ -45,7 +45,7 @@ def bot(message, history):
         yield history[-1]
 
 with gr.Blocks( css_paths="./style.css", css=custom_css) as demo:
-    with gr.Row(elem_classes=["row"]):
+    with gr.Row(elem_classes=["main-row"]):
         with gr.Column(elem_classes=["chat-column"]):
             chatbot = gr.ChatInterface(fn=bot, type="messages", multimodal=True, save_history=True, flagging_options=["like", "dislike"], flagging_mode="manual")
         with gr.Column(elem_classes=["file-column"]):
@@ -62,4 +62,4 @@ with gr.Blocks( css_paths="./style.css", css=custom_css) as demo:
             )
 
 if __name__ == "__main__":
-    demo.launch()
+    demo.launch(share=False)
